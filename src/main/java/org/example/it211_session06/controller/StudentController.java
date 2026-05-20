@@ -3,6 +3,7 @@ package org.example.it211_session06.controller;
 import org.example.it211_session06.model.entity.Student;
 import org.example.it211_session06.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,17 +14,18 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
+
     @Autowired
     private StudentRepository studentRepository;
 
-    // lay danh sach sinh vien
+    // 1. Lấy danh sách sinh viên
     @GetMapping
     public ResponseEntity<List<Student>> getAllStudents() {
         List<Student> students = studentRepository.findAll();
         return ResponseEntity.ok(students);
     }
 
-    // lay sinh vien theo id
+    // 2. Lấy sinh viên theo id
     @GetMapping("/{id}")
     public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
         Student student = studentRepository.findById(id).orElse(null);
@@ -32,15 +34,15 @@ public class StudentController {
         }
         return ResponseEntity.ok(student);
     }
-    //them sinh vien moi
+
     @PostMapping
-    public ResponseEntity<Student> createStudent(Student student) {
+    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
         Student savedStudent = studentRepository.save(student);
-        return ResponseEntity.ok(savedStudent);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
     }
-    //cap nhat toan bo sinh vien
+
     @PutMapping("/{id}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, Student student) {
+    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
         if (!studentRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -48,7 +50,7 @@ public class StudentController {
         Student updatedStudent = studentRepository.save(student);
         return ResponseEntity.ok(updatedStudent);
     }
-    // Cap nhat 1 phan sinh vien
+
     @PatchMapping("/{id}")
     public ResponseEntity<Student> patchStudent(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         Optional<Student> studentOptional = studentRepository.findById(id);
@@ -77,8 +79,7 @@ public class StudentController {
         return ResponseEntity.ok(patchedStudent);
     }
 
-    // Xoa sinh vien
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         if (!studentRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -86,6 +87,4 @@ public class StudentController {
         studentRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }
